@@ -4,7 +4,7 @@ import DiceRoller from "../../components/DiceRoller"
 export default function DiceGame() {
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full mx-auto">
         <DiceRoller />
       </div>
     </DashboardLayout>
