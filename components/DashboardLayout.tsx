@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
           </div>
           <div className="flex items-center">
-            <span className="mr-2">John Doe</span>
+            <span className="mr-2"></span>
             <User className="text-gray-600" />
           </div>
         </header>
