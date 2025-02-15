@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import DashboardLayout from "@/components/DashboardLayout"
@@ -17,78 +17,71 @@ type Category = {
   }>
 }
 
-// Categories data
 const categories: Category[] = [
   {
     id: "morse",
     name: "MORSE\nCODE",
-    color: "bg-[#E535E5]", // Purple
+    color: "bg-[#E535E5]",
     questions: [
       {
         question: "What is the Morse code for SOS?",
         answer: "... --- ...",
       },
-      // Add more Morse code questions
     ],
   },
   {
     id: "phonetic",
     name: "PHONETIC\nALPHABET",
-    color: "bg-[#35E5E5]", // Blue
+    color: "bg-[#35E5E5]",
     questions: [
       {
         question: "What is the phonetic alphabet for 'B'?",
         answer: "BRAVO",
       },
-      // Add more phonetic alphabet questions
     ],
   },
   {
     id: "voice",
     name: "VOICE\nPROCEDURE",
-    color: "bg-[#FFD700]", // Yellow
+    color: "bg-[#FFD700]",
     questions: [
       {
         question: "What PROWORD would you use to indicate an error in transmission?",
         answer: "CORRECTION",
       },
-      // Add more voice procedure questions
     ],
   },
   {
     id: "radio",
     name: "RADIO",
-    color: "bg-[#FF1493]", // Pink
+    color: "bg-[#FF1493]",
     questions: [
       {
         question: "What is the standard radio check response format?",
         answer: "ROGER, [STRENGTH] [READABILITY]",
       },
-      // Add more radio questions
     ],
   },
   {
-    id: "orders1",
+    id: "orders",
     name: "RECEIVE\nORDERS",
-    color: "bg-[#4CAF50]", // Green
+    color: "bg-[#4CAF50]",
     questions: [
       {
         question: "What are the 5 components of a Warning Order?",
         answer: "Situation, Mission, Execution, Service Support, Command & Signal",
       },
-      // Add more orders questions
     ],
   },
   {
-    id: "orders2",
-    name: "RECEIVE\nORDERS",
-    color: "bg-[#4CAF50]", // Green
+    id: "spare",
+    name: "SPARE",
+    color: "bg-[#4CAF50]",
     questions: [
       {
-        question: "What is the correct format for acknowledging orders?",
-        answer: "WILCO - Will Comply, or CANNOT COMPLY - State Reason",
+        question: "Editable spare question slot",
+        answer: "Editable spare answer slot",
       },
-      // Add more orders questions
     ],
   },
 ]
@@ -100,15 +93,6 @@ export default function TrainingGame() {
   const [currentQuestion, setCurrentQuestion] = useState<{ question: string; answer: string } | null>(null)
   const [showAnswer, setShowAnswer] = useState(false)
 
-  // Generate dots for the dice face
-  const generateDots = (value: number) => {
-    const dots = []
-    for (let i = 0; i < value; i++) {
-      dots.push(<div key={i} className="w-12 h-12 bg-black rounded-full" />)
-    }
-    return dots
-  }
-
   const rollDice = () => {
     if (isRolling) return
     setIsRolling(true)
@@ -119,7 +103,24 @@ export default function TrainingGame() {
       const newValue = Math.floor(Math.random() * 6) + 1
       setDiceValue(newValue)
       setIsRolling(false)
-    }, 1000)
+    }, 800)
+  }
+
+  const getDiceDots = (value: number) => {
+    const dots = []
+    if (value === 1 || value === 3 || value === 5) dots.push(1) // center
+    if (value >= 2) dots.push(2, 3) // top right, bottom left
+    if (value >= 4) dots.push(4, 5) // top left, bottom right
+    if (value === 6) dots.push(6, 7) // middle left, middle right
+    return dots
+  }
+
+  const generateDots = (value: number) => {
+    const dots = []
+    for (let i = 0; i < value; i++) {
+      dots.push(<div key={i} className="flex w-14 h-14 p-4 m-auto text-center bg-black rounded-full items-center justify-center" />)
+    }
+    return dots
   }
 
   const selectCategory = (category: Category) => {
@@ -137,35 +138,44 @@ export default function TrainingGame() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-[#f5f5f5] p-8">
-        <div className="max-w-full mx-auto">
+      <div className="min-h-screen bg-white">
+        <div className="max-w-[3840px] mx-auto p-8">
           {!selectedCategory ? (
-            <>
-              <div className="flex w-full space-y-8 gap-8">
+            // Main Game Screen
+            <div className="space-y-12">
+              {/* Title */}
+              <div className="text-center">
+                <h1 className="text-6xl font-bold">&quot;ROGER SO FAR&quot;</h1>
+              </div>
+
+              {/* Main Content */}
+              <div className="flex justify-between gap-3">
                 {/* Dice Section */}
-                <div className="flex items-start">
-                  <div className="bg-white border-2 border-black p-4 w-[300px]">
-                    <div className="text-sm text-gray-600 mb-2">Online-Stopwatch</div>
-                    <motion.div
-                      className="w-[250px] h-[250px] border-2 border-black p-4 grid grid-cols-3 gap-2 cursor-pointer"
-                      animate={isRolling ? { rotate: 360 } : {}}
-                      transition={{ duration: 0.5 }}
+                <div className="flex scene w-[300px] h-[300px] perspective-1000 justify-center items-start cursor-pointer" onClick={rollDice}>
+                  {isRolling ? (
+                    <video autoPlay loop
+                      src="/Dice Number 6.mp4"
+                      className={`w-full h-full border-2 border-black bg-white dice-face ${!isRolling ? "z-10" : ""}`}
+                    />
+                  ) : (
+                    <div
+                      className={`w-full h-full border-2 border-black mx-auto grid ${diceValue === 1 ? "grid-cols-1" : "grid-cols-2"}`}
                       onClick={rollDice}
                     >
                       {generateDots(diceValue)}
-                    </motion.div>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Categories Grid */}
-                <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-8">
+                <div className="w-[70%] grid grid-cols-3 gap-8">
                   {categories.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => selectCategory(category)}
                       className={cn(
                         category.color,
-                        "h-[200px] relative p-8 text-center font-bold text-2xl whitespace-pre-line",
+                        "aspect-square relative p-8 text-center font-bold text-3xl whitespace-pre-line",
                       )}
                     >
                       {/* CIS corners */}
@@ -180,54 +190,56 @@ export default function TrainingGame() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between mt-8">
-                <div className="flex items-center space-x-4">
-                  <div className="w-24 h-24 bg-[#4a5f31] flex items-center justify-center">
-                    <Image
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-02-11%20at%2020.44.39_faea61c3.jpg-JRDMhlr1qIEyKwyXKaedhDE7s6avn9.jpeg"
-                      alt="CIS Logo"
-                      width={80}
-                      height={80}
-                      className="rounded-lg"
-                    />
+              <div className="flex items-center justify-between mt-12">
+                <div className="flex items-center space-x-8">
+                  <div className="w-32 h-32 bg-[#4a5f31] flex items-center justify-center">
+                    <span className="text-white text-4xl">CIS</span>
                   </div>
-                  <span className="text-4xl font-bold text-[#1a237e]">EXERCISE &apos;ROGER SO FAR&apos;</span>
+                  <span className="text-6xl font-bold">EXERCISE &apos;ROGER SO FAR&apos;</span>
                 </div>
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-02-11%20at%2020.44.39_faea61c3.jpeg-JRDMhlr1qIEyKwyXKaedhDE7s6avn9.jpeg"
-                  alt="Communications Information Systems"
-                  width={100}
-                  height={100}
-                  className="rounded-lg"
-                />
-              </div>
-            </>
-          ) : (
-            // Question Screen
-            <div className="h-screen flex flex-col items-center justify-center p-8">
-              <div className={cn(selectedCategory.color, "w-full max-w-4xl p-12 rounded-lg text-center space-y-8")}>
-                <h2 className="text-4xl font-bold mb-8">{selectedCategory.name}</h2>
-                {currentQuestion && (
-                  <>
-                    <div className="text-3xl font-bold mb-8">{currentQuestion.question}</div>
-                    {showAnswer && (
-                      <div className="text-3xl font-bold p-4 bg-white/90 rounded">{currentQuestion.answer}</div>
-                    )}
-                    <div className="flex justify-center space-x-4">
-                      <button
-                        onClick={() => setShowAnswer(!showAnswer)}
-                        className="bg-white px-8 py-4 rounded-lg text-xl font-bold"
-                      >
-                        {showAnswer ? "Hide Answer" : "Reveal Answer"}
-                      </button>
-                      <button onClick={handleBack} className="bg-white px-8 py-4 rounded-lg text-xl font-bold">
-                        Back to Categories
-                      </button>
-                    </div>
-                  </>
-                )}
+
               </div>
             </div>
+          ) : (
+
+            // Question Screen
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-screen flex flex-col items-center justify-center"
+              >
+                <div className={cn(selectedCategory.color, "w-[800px] aspect-square p-16 text-center space-y-8")}>
+                  <h2 className="text-4xl font-bold mb-12">{selectedCategory.name}</h2>
+                  {currentQuestion && (
+                    <>
+                      <div className="text-3xl font-bold mb-12">{currentQuestion.question}</div>
+                      {showAnswer && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-3xl font-bold p-8 bg-white/90"
+                        >
+                          {currentQuestion.answer}
+                        </motion.div>
+                      )}
+                      <div className="flex justify-center space-x-8 mt-12">
+                        <button
+                          onClick={() => setShowAnswer(!showAnswer)}
+                          className="bg-white px-12 py-6 text-2xl font-bold"
+                        >
+                          {showAnswer ? "Hide Answer" : "Reveal Answer"}
+                        </button>
+                        <button onClick={handleBack} className="bg-white px-12 py-6 text-2xl font-bold">
+                          Back
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           )}
         </div>
       </div>

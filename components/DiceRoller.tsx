@@ -105,7 +105,7 @@ export default function DiceRoller() {
   const generateDots = (value: number) => {
     const dots = []
     for (let i = 0; i < value; i++) {
-      dots.push(<div key={i} className="w-8 h-8 bg-black rounded-full" />)
+      dots.push(<div key={i} className="flex w-14 h-14 p-4 m-auto text-center bg-black rounded-full items-center justify-center" />)
     }
     return dots
   }
@@ -116,20 +116,21 @@ export default function DiceRoller() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Dice Section */}
-          <Card className="bg-white w-[250px] border-2 border-gray-300">
-            <CardContent className="p-6">
-              <div className="text-sm text-gray-600 mb-2">Online-Stopwatch</div>
-              <motion.div
-                className="w-48 h-48 border-2 border-black p-4 mx-auto grid grid-cols-3 gap-2"
-                animate={isRolling ? { rotate: 360 } : {}}
-                transition={{ duration: 0.5 }}
+          <div className="flex scene w-[300px] h-[300px] perspective-1000 justify-center items-start cursor-pointer" onClick={rollDice}>
+            {isRolling ? (
+              <video autoPlay loop
+                src="/Dice Number 6.mp4"
+                className={`w-full h-full border-2 border-black bg-white dice-face ${!isRolling ? "z-10" : ""}`}
+              />
+            ) : (
+              <div
+                className={`w-full h-full border-2 border-black mx-auto grid ${diceValue === 1 ? "grid-cols-1" : "grid-cols-2"}`}
                 onClick={rollDice}
-                style={{ cursor: "pointer" }}
               >
                 {generateDots(diceValue)}
-              </motion.div>
-            </CardContent>
-          </Card>
+              </div>
+            )}
+          </div>
 
           {/* Question Section */}
           <div className="w-full">
