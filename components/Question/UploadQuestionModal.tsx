@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import Link from "next/link";
 
 
 export default function UploadQuestionModal() {
@@ -120,9 +121,15 @@ export default function UploadQuestionModal() {
           </RadioGroup>
         </div>
       </div>
-      <Button type="submit" onClick={handleSubmit} disabled={loading}>
-        {loading ? "Uploading..." : "Upload Question"}
-      </Button>
+
+      <div className="flex items-center justify-between mt-8">
+        <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-2 text-md rounded-md">
+          Back to Home
+        </Link>
+        <Button type="submit" onClick={handleSubmit} disabled={loading}>
+          {loading ? "Uploading..." : "Upload Question"}
+        </Button>
+      </div>
     </section>
   );
 }
