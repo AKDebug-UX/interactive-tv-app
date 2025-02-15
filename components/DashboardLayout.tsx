@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Dice1Icon as DiceIcon, HelpCircle, Settings, User, Menu, X } from "lucide-react"
+import { Dice1Icon as User, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
@@ -45,21 +45,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center">
             <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
           </div>
-          <div className="flex items-center">
-            <NavItem href="/upload-qa" icon={Home}>
+          <div className="flex bg-gray-100 rounded-md items-center">
+            <NavItem href="/upload-qa" icon={Plus}>
               Upload Question
             </NavItem>
-            {/* <NavItem href="/dice-game" icon={DiceIcon}>
-              Dice Game
-            </NavItem> */}
-            {/* <NavItem href="/qa-game" icon={HelpCircle}>
-              Q&A Game
-            </NavItem>
-            <NavItem href="/settings" icon={Settings}>
-              Settings
-            </NavItem> */}
-            <span className="mr-2"></span>
-            <User className="text-gray-600" />
           </div>
         </header>
 
