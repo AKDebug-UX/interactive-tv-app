@@ -42,11 +42,11 @@ export default function TrainingGame() {
             {/* Main Content */}
             <div className="flex w-full justify-between gap-16">
               {/* Dice Section */}
-              <div className="flex scene w-[300px] h-[300px] perspective-1000 justify-center items-start cursor-pointer" onClick={rollDice}>
+              <div className="flex scene w-[320px] h-[320px] perspective-1000 justify-center items-start cursor-pointer" onClick={rollDice}>
                 {isRolling ? (
                   <video autoPlay loop
                     src="/Dice Number 6.mp4"
-                    className={`w-full h-full border-2 border-black bg-white dice-face ${!isRolling ? "z-10" : ""}`}
+                    className={`w-[320px] h-[250px] border-2 border-black bg-white dice-face ${!isRolling ? "z-10" : ""}`}
                   />
                 ) : (
                   <Image src={selectedImage} alt="Dice Face" width={350} height={350} className="border-2 border-black" />

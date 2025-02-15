@@ -46,8 +46,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
           </div>
           <div className="flex items-center">
-            <NavItem href="/" icon={Home}>
-              Home
+            <NavItem href="/upload-qa" icon={Home}>
+              Upload Question
             </NavItem>
             {/* <NavItem href="/dice-game" icon={DiceIcon}>
               Dice Game
