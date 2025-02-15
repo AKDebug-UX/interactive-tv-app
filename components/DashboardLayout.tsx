@@ -42,9 +42,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex flex-col flex-1 overflow-y-auto">
         {/* Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
-          <div className="flex items-center">
+          <Link href={"/"} className="flex items-center">
             <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
-          </div>
+          </Link>
           <div className="flex bg-gray-100 rounded-md items-center">
             <NavItem href="/upload-qa" icon={Plus}>
               Upload Question

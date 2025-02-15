@@ -67,7 +67,7 @@ export default function UploadQuestionModal() {
   };
 
   return (
-    <section>
+    <section className="w-[500px] mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1>Upload New Question</h1>
       <div className="grid gap-4 py-4">
         {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -108,7 +108,7 @@ export default function UploadQuestionModal() {
           />
         </div>
 
-        <div className="grid grid-cols-4 items-center gap-4">
+        <div className="grid grid-cols-4 items-start gap-4">
           <Label className="text-right">Correct Answer</Label>
           <RadioGroup value={correctAnswer} onValueChange={setCorrectAnswer} className="col-span-3">
             {["a", "b", "c", "d"].map((value) => (
