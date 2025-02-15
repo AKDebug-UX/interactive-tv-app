@@ -20,7 +20,7 @@ function NavItem({ href, icon: Icon, children }: NavItemProps) {
   return (
     <Link
       href={href}
-      className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 ${isActive ? "bg-gray-200" : ""}`}
+      className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 ${isActive ? "text-blue" : ""}`}
     >
       <Icon className="mr-3" />
       {children}
@@ -49,9 +49,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <NavItem href="/" icon={Home}>
               Home
             </NavItem>
-            <NavItem href="/dice-game" icon={DiceIcon}>
+            {/* <NavItem href="/dice-game" icon={DiceIcon}>
               Dice Game
-            </NavItem>
+            </NavItem> */}
             {/* <NavItem href="/qa-game" icon={HelpCircle}>
               Q&A Game
             </NavItem>

@@ -1,11 +1,11 @@
 import DashboardLayout from "@/components/DashboardLayout"
-import QuestionCategories from "@/components/Question/QuestionCategories"
+import QuePerDice from "@/components/Question/QuePerDice"
 
 export default function QAGame() {
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <QuestionCategories />
+      <div className="w-full mx-auto">
+        <QuePerDice />
       </div>
     </DashboardLayout>
   )
