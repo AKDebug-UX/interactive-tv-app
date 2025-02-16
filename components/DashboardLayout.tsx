@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex flex-col h-screen">
       {/* Main Content */}
       {/* Header */}
-      <header className="flex items-center justify-between px-6 md:px-[12rem] py-4 bg-white shadow-md">
+      <header className="flex items-center justify-between px-6 lg:px-[6rem] xl:px-[12rem] py-4 bg-white shadow-md">
         <Link href={"/"} className="flex items-center">
           <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
         </Link>
@@ -51,8 +51,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </NavItem>
         </div>
       </header>
-      <div className="flex flex-col md:px-[12rem] py-[3rem] overflow-y-auto">
-        <main className="flex-1 p-6">{children}</main>
+      <div className="flex flex-col lg:px-[6rem] xl:px-[12rem] py-[3rem] overflow-y-auto">
+        <main className="flex-1">{children}</main>
         <Footer />
       </div>
     </div>
