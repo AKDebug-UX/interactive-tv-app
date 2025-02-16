@@ -7,6 +7,7 @@ import { Dice1Icon as User, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Footer from "./Footer"
+import Image from "next/image"
 
 interface NavItemProps {
   href: string
@@ -42,8 +43,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       {/* Header */}
       <header className="flex items-center justify-between px-6 lg:px-[6rem] xl:px-[12rem] py-4 bg-white shadow-md">
-        <Link href={"/"} className="flex items-center">
-          <h2 className="text-xl font-semibold text-gray-800">ROGER SO FAR</h2>
+        <Link href={"/"} className="flex w-[180px] h-16 relative items-center">
+          <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
         </Link>
         <div className="flex bg-gray-100 rounded-md items-center">
           <NavItem href="/upload-qa" icon={Plus}>
