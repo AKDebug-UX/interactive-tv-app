@@ -68,9 +68,9 @@ function QuePerDice(): JSX.Element {
 
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="w-full flex mb-12 items-center justify-center">
       {!loading ?
-        <div className="flex flex-col md:flex-row gap-8 items-center">
+        <div className="flex flex-col md:flex-row w-full gap-16 items-center">
           <div className="mx-auto text-center">
             <div className="scene w-[300px] h-[300px] flex justify-center items-start cursor-pointer">
               <Image
@@ -81,26 +81,35 @@ function QuePerDice(): JSX.Element {
                 className="border-2 border-black"
               />
             </div>
-            <div className="mt-8">
+            <div className="mt-16">
               <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-4 text-xl">
                 Back to Home
               </Link>
             </div>
           </div>
 
-          <div className="w-full">
-            <h1 className="text-2xl md:text-4xl font-bold text-[#1a237e]">"{name}"</h1>
+          <div className="flex flex-col w-[70%] items-center justify-between space-x-8">
+            <div className="flex items-center space-x-8">
+              <div className="w-[250px] h-20 relative flex items-center justify-center">
+                <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
+              </div>
+              <span className="text-5xl text-black font-bold">"ROGER SO FAR"</span>
+              <div className="w-16 h-16 relative flex items-center justify-center">
+                <Image src={`img/CiS_Badge.png`} alt="Dice Face" fill className="" />
+              </div>
+            </div>
+
             <div className="p-6 mt-4">
               {currentQuestion ? (
-                <div className="font-bold md:w-[80%] mx-auto text-center text-xl">
+                <div className="font-bold md:w-[80%] mx-auto text-center text-3xl">
                   Q: {currentQuestion.question}
-                  <ul className="flex gap-6 justify-between mt-4 text-lg">
+                  {/* <ul className="flex gap-6 justify-between mt-4 text-lg">
                     {currentQuestion.options.map((option) => (
                       <li key={option.id} className="mt-2">
                         {option.text}
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
                 </div>
               ) : (
                 <p className="text-lg">No questions available for this category.</p>
@@ -108,19 +117,29 @@ function QuePerDice(): JSX.Element {
             </div>
             {currentQuestion && (
               <>
+                {/* {showAnswer && (
+                  <div className="mt-4 text-2xl font-semibold text-gray-800">
+                    A: {currentQuestion.options.find(opt => opt.id === currentQuestion.correctAnswerId)?.text}
+                  </div>
+                )} */}
                 <button
                   onClick={() => setShowAnswer(!showAnswer)}
-                  className="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-6 py-3 text-lg"
+                  className="mt-4 text-2xl font-semibold text-gray-800"
                 >
-                  {showAnswer ? "Hide Answer" : "Show Answer"}
+                  {showAnswer ? <>A: {currentQuestion.options.find(opt => opt.id === currentQuestion.correctAnswerId)?.text}</> : "Show Answer"}
                 </button>
-                {showAnswer && (
-                  <div className="mt-4 text-lg font-semibold text-gray-800">
-                    Correct Answer: {currentQuestion.options.find(opt => opt.id === currentQuestion.correctAnswerId)?.text}
-                  </div>
-                )}
               </>
             )}
+
+            <span
+              className="text-6xl text-[#FFD700] mt-20 font-bold"
+              style={{
+                textShadow: "2px 2px 0px black, -2px 2px 0px black, 2px -2px 0px black, -2px -2px 0px black"
+              }}
+            >
+              "{name}"
+            </span>
+
           </div>
         </div>
         :
