@@ -98,16 +98,22 @@ export default function UploadQuestionModal() {
         ))}
 
         <div className="grid grid-cols-4 items-center gap-4">
-          <Label className="text-right">
-            Category
-          </Label>
-          <Input
-            id={`category`}
+          <Label className="text-right">Category</Label>
+          <select
+            id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="col-span-3"
-          />
+            className="col-span-3 border rounded-md p-2"
+          >
+            <option value="MORSE CODE">MORSE CODE</option>
+            <option value="PHONETIC ALPHABET">PHONETIC ALPHABET</option>
+            <option value="VOICE PROCEDURE">VOICE PROCEDURE</option>
+            <option value="RADIO">RADIO</option>
+            <option value="RECEIVE ORDERS">RECEIVE ORDERS</option>
+            <option value="SPARE">SPARE</option>
+          </select>
         </div>
+
 
         <div className="grid grid-cols-4 items-start gap-4">
           <Label className="text-right">Correct Answer</Label>

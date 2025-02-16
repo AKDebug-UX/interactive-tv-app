@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Dice1Icon as User, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import Footer from "./Footer"
 
 interface NavItemProps {
   href: string
@@ -37,23 +38,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex flex-col h-screen">
       {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-y-auto">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
-          <Link href={"/"} className="flex items-center">
-            <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
-          </Link>
-          <div className="flex bg-gray-100 rounded-md items-center">
-            <NavItem href="/upload-qa" icon={Plus}>
-              Upload Question
-            </NavItem>
-          </div>
-        </header>
-
-        {/* Page Content */}
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 md:px-[12rem] py-4 bg-white shadow-md">
+        <Link href={"/"} className="flex items-center">
+          <h2 className="text-xl font-semibold text-gray-800">Interactive TV Games</h2>
+        </Link>
+        <div className="flex bg-gray-100 rounded-md items-center">
+          <NavItem href="/upload-qa" icon={Plus}>
+            Upload Question
+          </NavItem>
+        </div>
+      </header>
+      <div className="flex flex-col md:px-[12rem] py-[3rem] overflow-y-auto">
         <main className="flex-1 p-6">{children}</main>
+        <Footer />
       </div>
     </div>
   )

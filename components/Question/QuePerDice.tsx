@@ -32,9 +32,11 @@ function QuePerDice(): JSX.Element {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchQuestions() {
+      setLoading(true);
       try {
         const res = await fetch("/api/questions");
         const data = await res.json();
@@ -57,29 +59,35 @@ function QuePerDice(): JSX.Element {
         }
       } catch (error) {
         console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchQuestions();
   }, [name]);
 
-  const handleNextQuestion = () => {
-    setCurrentQuestion(getRandomQuestion(questions));
-    setShowAnswer(false);
-  };
 
   return (
-    <div className="mt-12 w-full bg-[#f5f5f5] md:p-6 flex items-center justify-center">
-      <div className="mx-auto text-center">
+    <div className="w-full flex items-center justify-center">
+      {!loading ?
         <div className="flex flex-col md:flex-row gap-8 items-center">
-          <div className="scene w-[300px] h-[300px] flex justify-center items-start cursor-pointer">
-            <Image
-              src={`/dice/dice-face-${id}.png`}
-              alt="Dice Face"
-              width={350}
-              height={350}
-              className="border-2 border-black"
-            />
+          <div className="mx-auto text-center">
+            <div className="scene w-[300px] h-[300px] flex justify-center items-start cursor-pointer">
+              <Image
+                src={`/dice/dice-face-${id}.png`}
+                alt="Dice Face"
+                width={350}
+                height={350}
+                className="border-2 border-black"
+              />
+            </div>
+            <div className="mt-8">
+              <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-4 text-xl">
+                Back to Home
+              </Link>
+            </div>
           </div>
+
           <div className="w-full">
             <h1 className="text-2xl md:text-4xl font-bold text-[#1a237e]">"{name}"</h1>
             <div className="p-6 mt-4">
@@ -115,12 +123,11 @@ function QuePerDice(): JSX.Element {
             )}
           </div>
         </div>
-        <div className="mt-8">
-          <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-4 text-xl">
-            Back to Home
-          </Link>
+        :
+        <div className='flex items-center justify-center h-screen'>
+          <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary' />
         </div>
-      </div>
+      }
     </div>
   );
 }
