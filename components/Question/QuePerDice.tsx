@@ -89,7 +89,7 @@ function QuePerDice(): JSX.Element {
           </div>
 
           <div className="flex flex-col w-[70%] items-center justify-between space-x-8">
-            <div className="flex items-center space-x-8">
+            {/* <div className="flex items-center space-x-8">
               <div className="w-[250px] h-20 relative flex items-center justify-center">
                 <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
               </div>
@@ -97,7 +97,7 @@ function QuePerDice(): JSX.Element {
               <div className="w-16 h-16 relative flex items-center justify-center">
                 <Image src={`img/CiS_Badge.png`} alt="Dice Face" fill className="" />
               </div>
-            </div>
+            </div> */}
 
             <div className="p-6 mt-4">
               {currentQuestion ? (

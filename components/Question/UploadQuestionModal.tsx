@@ -110,7 +110,7 @@ export default function UploadQuestionModal() {
             <option value="VOICE PROCEDURE">VOICE PROCEDURE</option>
             <option value="RADIO">RADIO</option>
             <option value="RECEIVE ORDERS">RECEIVE ORDERS</option>
-            <option value="SPARE">SPARE</option>
+            <option value="GENERAL KNOWLEDGE">GENERAL KNOWLEDGE</option>
           </select>
         </div>
 
@@ -132,7 +132,7 @@ export default function UploadQuestionModal() {
         <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-2 text-md rounded-md">
           Back to Home
         </Link>
-        <Button type="submit" onClick={handleSubmit} disabled={loading}>
+        <Button className="border hover:bg-[#3d4f28] text-black hover:text-white px-8 py-2 text-md rounded-md" type="submit" onClick={handleSubmit} disabled={loading}>
           {loading ? "Uploading..." : "Upload Question"}
         </Button>
       </div>

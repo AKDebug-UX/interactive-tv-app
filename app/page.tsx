@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
 import DashboardLayout from "@/components/DashboardLayout"
 import Link from "next/link"
 
@@ -117,8 +116,8 @@ const categories: Category[] = [
   },
   {
     id: 6,
-    img: "Spare.jpg",
-    name: "SPARE",
+    img: "GeneralKnowledge.jpg",
+    name: "GENERAL KNOWLEDGE",
     color: "bg-[#4CAF50]",
   },
 ]
