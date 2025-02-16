@@ -105,7 +105,7 @@ const categories: Category[] = [
   },
   {
     id: 4,
-    img: "Morse_Code.png",
+    img: "Radio.jpg",
     name: "RADIO",
     color: "bg-[#FF1493]",
   },
