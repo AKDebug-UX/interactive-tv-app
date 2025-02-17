@@ -10,9 +10,9 @@ export default function Footer() {
       </div>
       <div className="flex w-full items-end justify-between space-x-8">
         <span className="text-6xl text-[#1a237e] font-bold">EXERCISE &apos;ROGER SO FAR&apos;</span>
-        <div className="w-[270px] h-20 relative">
+        {/* <div className="w-[270px] h-20 relative">
           <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
-        </div>
+        </div> */}
       </div>
     </div>
   )
