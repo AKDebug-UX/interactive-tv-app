@@ -19,7 +19,7 @@ export default function QuestionManager() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [question, setQuestion] = useState("")
-  const [options, setOptions] = useState(["", "", "", ""])
+  const [options, setOptions] = useState<string[]>([""])
   const [category, setCategory] = useState("")
   const [correctAnswer, setCorrectAnswer] = useState("")
   const [loading, setLoading] = useState(false)
@@ -60,9 +60,20 @@ export default function QuestionManager() {
     setOptions(newOptions)
   }
 
+  const addOption = () => {
+    if (options.length < 4) {
+      setOptions([...options, ""])
+    }
+  }
+
+  const removeAllOptions = () => {
+    setOptions([])
+    setCorrectAnswer("")
+  }
+
   const handleSubmit = async () => {
-    if (!question || options.some((opt) => opt === "") || !correctAnswer || !category) {
-      setError("Please fill in all fields.")
+    if (!question || options.length === 0 || options.some((opt) => opt === "") || !correctAnswer || !category) {
+      setError("Please fill in all fields and add at least one option.")
       return
     }
 
@@ -103,7 +114,7 @@ export default function QuestionManager() {
 
   const resetForm = () => {
     setQuestion("")
-    setOptions(["", "", "", ""])
+    setOptions([])
     setCategory("")
     setCorrectAnswer("")
     setCurrentQuestion(null)
@@ -144,19 +155,45 @@ export default function QuestionManager() {
           </Label>
           <Input id="question" value={question} onChange={(e) => setQuestion(e.target.value)} className="col-span-3" />
         </div>
-        {options.map((option, index) => (
-          <div key={index} className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor={`option-${index}`} className="text-right">
-              Option {String.fromCharCode(65 + index)}
-            </Label>
-            <Input
-              id={`option-${index}`}
-              value={option}
-              onChange={(e) => handleOptionChange(index, e.target.value)}
-              className="col-span-3"
-            />
+        {options.length > 0 ? (
+          options.map((option, index) => (
+            <div key={index} className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor={`option-${index}`} className="text-right">
+                Option {String.fromCharCode(65 + index)}
+              </Label>
+              <Input
+                id={`option-${index}`}
+                value={option}
+                onChange={(e) => handleOptionChange(index, e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          ))
+        ) : (
+          <div className="grid grid-cols-4 items-center gap-4">
+            <div className="col-start-2 col-span-3">
+              <p className="text-gray-500 italic">No options added yet.</p>
+            </div>
           </div>
-        ))}
+        )}
+        {options.length < 4 && (
+          <div className="grid grid-cols-4 items-center gap-4">
+            <div className="col-start-2 col-span-3">
+              <Button onClick={addOption} variant="outline">
+                Add Option {String.fromCharCode(65 + options.length)}
+              </Button>
+            </div>
+          </div>
+        )}
+        {options.length > 0 && (
+          <div className="grid grid-cols-4 items-center gap-4">
+            <div className="col-start-2 col-span-3">
+              <Button onClick={removeAllOptions} variant="outline" className="bg-red-100 hover:bg-red-200 text-red-600">
+                Remove All Options
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-4 items-center gap-4">
           <Label className="text-right">Category</Label>
@@ -179,12 +216,19 @@ export default function QuestionManager() {
         <div className="grid grid-cols-4 items-start gap-4">
           <Label className="text-right">Correct Answer</Label>
           <RadioGroup value={correctAnswer} onValueChange={setCorrectAnswer} className="col-span-3">
-            {["a", "b", "c", "d"].map((value) => (
-              <div key={value} className="flex items-center space-x-2">
-                <RadioGroupItem value={value} id={`answer-${value}`} />
-                <Label htmlFor={`answer-${value}`}>Option {value.toUpperCase()}</Label>
-              </div>
-            ))}
+            {options.length > 0 ? (
+              options.map((_, index) => {
+                const value = String.fromCharCode(97 + index)
+                return (
+                  <div key={value} className="flex items-center space-x-2">
+                    <RadioGroupItem value={value} id={`answer-${value}`} />
+                    <Label htmlFor={`answer-${value}`}>Option {value.toUpperCase()}</Label>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-gray-500 italic">No options available.</p>
+            )}
           </RadioGroup>
         </div>
       </div>
