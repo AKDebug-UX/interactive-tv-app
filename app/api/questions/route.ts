@@ -67,3 +67,28 @@ export async function PUT(req: Request) {
   }
 }
 
+// ✅ Handle DELETE Requests for deleting questions
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url)
+    const id = url.searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json({ success: false, message: "Question ID is required." }, { status: 400 })
+    }
+
+    const { db } = await connectToDatabase()
+
+    const result = await db.collection("questions").deleteOne({ _id: new ObjectId(id) })
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ success: false, message: "Question not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: "Question deleted successfully" }, { status: 200 })
+  } catch (error) {
+    console.log("Error deleting question:", error)
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 })
+  }
+}
+
