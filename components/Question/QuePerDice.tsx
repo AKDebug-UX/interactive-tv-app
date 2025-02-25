@@ -184,7 +184,7 @@ function QuePerDice(): JSX.Element {
             )}
             {currentQuestion && showAnswer && (
               <div className="mt-4 text-2xl font-semibold text-green-600">
-                A: {currentQuestion.options.find((opt) => opt.id === currentQuestion.correctAnswerId)?.text}
+                Ans: {currentQuestion.options.find((opt) => opt.id === currentQuestion.correctAnswerId)?.text}
               </div>
             )}
 
