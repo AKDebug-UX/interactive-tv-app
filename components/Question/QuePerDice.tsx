@@ -102,7 +102,7 @@ function QuePerDice(): JSX.Element {
       const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
 
       // Play ticking sound
-      playSound(440, 0.1) // 440 Hz for 100ms
+      playSound(840, 0.1) // 440 Hz for 100ms
 
       return () => {
         clearTimeout(timerId)
