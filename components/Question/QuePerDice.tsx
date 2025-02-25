@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -35,6 +35,35 @@ function QuePerDice(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
   const [timeLeft, setTimeLeft] = useState<number>(30)
   const [timerActive, setTimerActive] = useState<boolean>(true)
+
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const oscillatorRef = useRef<OscillatorNode | null>(null)
+
+  useEffect(() => {
+    // Initialize AudioContext
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+    return () => {
+      // Cleanup AudioContext when component unmounts
+      audioContextRef.current?.close()
+    }
+  }, [])
+
+  const playSound = useCallback((frequency: number, duration: number) => {
+    if (audioContextRef.current) {
+      const oscillator = audioContextRef.current.createOscillator()
+      oscillator.type = "sine"
+      oscillator.frequency.setValueAtTime(frequency, audioContextRef.current.currentTime)
+
+      const gainNode = audioContextRef.current.createGain()
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime) // Set volume to 10%
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContextRef.current.destination)
+
+      oscillator.start()
+      oscillator.stop(audioContextRef.current.currentTime + duration)
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -71,11 +100,19 @@ function QuePerDice(): JSX.Element {
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
       const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timerId)
+
+      // Play ticking sound
+      playSound(440, 0.1) // 440 Hz for 100ms
+
+      return () => {
+        clearTimeout(timerId)
+      }
     } else if (timeLeft === 0) {
       setTimerActive(false)
+      // Play time's up sound
+      playSound(880, 0.5) // 880 Hz for 500ms
     }
-  }, [timeLeft, timerActive])
+  }, [timeLeft, timerActive, playSound])
 
   const handleContinue = () => {
     setTimerActive(false)
