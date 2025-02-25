@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex flex-col h-screen">
       {/* Main Content */}
       {/* Header */}
-      <header className="flex items-center justify-between px-6 lg:px-[6rem] xl:px-[12rem] py-4 bg-white shadow-md">
+      <header className="flex items-center justify-between px-6 lg:px-[1rem] xl:px-[7rem] py-4 bg-white shadow-md">
         <Link href={"/"} className="flex w-[180px] h-16 relative items-center">
           <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
         </Link>
@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </NavItem>
         </div>
       </header>
-      <div className="flex flex-col lg:px-[6rem] xl:px-[12rem] py-[3rem] overflow-y-auto">
+      <div className="flex flex-col lg:px-[1rem] xl:px-[7rem] py-[3rem] overflow-y-auto">
         <main className="flex-1">{children}</main>
         <Footer />
       </div>
