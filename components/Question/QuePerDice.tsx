@@ -18,9 +18,10 @@ interface Question {
 
 type Category = string
 
-function getRandomQuestion(questions: Question[]): Question | null {
-  if (questions.length === 0) return null
-  return questions[Math.floor(Math.random() * questions.length)]
+function getRandomQuestion(questions: Question[], askedQuestions: Set<string>): Question | null {
+  const availableQuestions = questions.filter(q => !askedQuestions.has(q.question))
+  if (availableQuestions.length === 0) return null
+  return availableQuestions[Math.floor(Math.random() * availableQuestions.length)]
 }
 
 function QuePerDice(): JSX.Element {
@@ -31,19 +32,17 @@ function QuePerDice(): JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState<Category>("")
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
+  const [askedQuestions, setAskedQuestions] = useState<Set<string>>(new Set())
   const [showAnswer, setShowAnswer] = useState<boolean>(false)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const [timeLeft, setTimeLeft] = useState<number>(30)
-  const [timerActive, setTimerActive] = useState<boolean>(true)
+  const [timerActive, setTimerActive] = useState<boolean>(false)
 
   const audioContextRef = useRef<AudioContext | null>(null)
-  const oscillatorRef = useRef<OscillatorNode | null>(null)
 
   useEffect(() => {
-    // Initialize AudioContext
     audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     return () => {
-      // Cleanup AudioContext when component unmounts
       audioContextRef.current?.close()
     }
   }, [])
@@ -53,13 +52,10 @@ function QuePerDice(): JSX.Element {
       const oscillator = audioContextRef.current.createOscillator()
       oscillator.type = "sine"
       oscillator.frequency.setValueAtTime(frequency, audioContextRef.current.currentTime)
-
       const gainNode = audioContextRef.current.createGain()
-      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime) // Set volume to 10%
-
+      gainNode.gain.setValueAtTime(0.1, audioContextRef.current.currentTime)
       oscillator.connect(gainNode)
       gainNode.connect(audioContextRef.current.destination)
-
       oscillator.start()
       oscillator.stop(audioContextRef.current.currentTime + duration)
     }
@@ -67,31 +63,28 @@ function QuePerDice(): JSX.Element {
 
   useEffect(() => {
     async function fetchQuestions() {
-      setLoading(true)
       try {
         const res = await fetch("/api/questions")
         const data = await res.json()
         if (data.success && data.data.length > 0) {
           const groupedQuestions: Record<Category, Question[]> = {}
-
           data.data.forEach((q: { category: string; question: string; options: Option[]; correctAnswerId: string }) => {
             if (!groupedQuestions[q.category]) groupedQuestions[q.category] = []
-            groupedQuestions[q.category].push({
-              question: q.question,
-              options: q.options,
-              correctAnswerId: q.correctAnswerId,
-            })
+            groupedQuestions[q.category].push(q)
           })
-
           setCategories(Object.keys(groupedQuestions))
           setSelectedCategory(name)
           setQuestions(groupedQuestions[name] || [])
-          setCurrentQuestion(getRandomQuestion(groupedQuestions[name] || []))
+          setAskedQuestions(new Set())
+          setCurrentQuestion(getRandomQuestion(groupedQuestions[name] || [], new Set()))
         }
       } catch (error) {
         console.error("Error fetching questions:", error)
       } finally {
         setLoading(false)
+        setTimeout(() => {
+          setTimerActive(true)
+        }, 500) // Ensure UI loads first before starting timer
       }
     }
     fetchQuestions()
@@ -99,27 +92,26 @@ function QuePerDice(): JSX.Element {
 
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
-      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-
-      // Play ticking sound
-      playSound(840, 0.1) // 440 Hz for 100ms
-
-      return () => {
-        clearTimeout(timerId)
-      }
+      const timerId = setTimeout(() => {
+        setTimeLeft(timeLeft - 1)
+        playSound(840, 0.1)
+      }, 1000)
+      return () => clearTimeout(timerId)
     } else if (timeLeft === 0) {
       setTimerActive(false)
-      // Play time's up sound
-      playSound(880, 0.5) // 880 Hz for 500ms
+      playSound(880, 0.5)
     }
-  }, [timeLeft, timerActive, playSound])
+  }, [timerActive, timeLeft, playSound])
 
   const handleContinue = () => {
-    setTimerActive(false)
     setShowAnswer(false)
-    setCurrentQuestion(getRandomQuestion(questions))
-    setTimeLeft(30)
-    setTimerActive(true)
+    const nextQuestion = getRandomQuestion(questions, askedQuestions)
+    if (nextQuestion) {
+      setAskedQuestions(prev => new Set([...prev, nextQuestion.question]))
+      setCurrentQuestion(nextQuestion)
+      setTimeLeft(30)
+      setTimerActive(true)
+    }
   }
 
   return (
@@ -207,11 +199,10 @@ function QuePerDice(): JSX.Element {
   )
 }
 
-const WithSuspense = (): JSX.Element => (
-  <Suspense fallback={<>Loading...</>}>
-    <QuePerDice />
-  </Suspense>
-)
-
-export default WithSuspense
-
+export default function WithSuspense() {
+  return (
+    <Suspense fallback={<>Loading...</>}>
+      <QuePerDice />
+    </Suspense>
+  )
+}
