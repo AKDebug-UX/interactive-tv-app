@@ -4,8 +4,8 @@ import { type ReactNode, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Dice1Icon as User, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { InstallPWA } from "@/components/install-pwa"
+import { NetworkStatus } from "@/components/network-status"
 import Footer from "./Footer"
 import Image from "next/image"
 
@@ -46,10 +46,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <Link href={"/"} className="flex w-[180px] h-16 relative items-center">
           <Image src={`img/CiS_ACF_CCF_Banner_Kings_Crown.png`} alt="Dice Face" fill className="" />
         </Link>
-        <div className="flex bg-gray-100 rounded-md items-center">
-          <NavItem href="/upload-qa" icon={Plus}>
-            Upload Question
-          </NavItem>
+        <div className="flex gap-3 items-center">
+          <NetworkStatus />
+          <InstallPWA />
+          <div className="flex bg-gray-100 rounded-md items-center">
+            <NavItem href="/upload-qa" icon={Plus}>
+              Upload Question
+            </NavItem>
+          </div>
         </div>
       </header>
       <div className="flex flex-col lg:px-[1rem] xl:px-[7rem] py-[3rem] overflow-y-auto">

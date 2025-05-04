@@ -14,12 +14,13 @@ interface Question {
   question: string
   options: Option[]
   correctAnswerId: string
+  category?: string
 }
 
 type Category = string
 
 function getRandomQuestion(questions: Question[], askedQuestions: Set<string>): Question | null {
-  const availableQuestions = questions.filter(q => !askedQuestions.has(q.question))
+  const availableQuestions = questions.filter((q) => !askedQuestions.has(q.question))
   if (availableQuestions.length === 0) return null
   return availableQuestions[Math.floor(Math.random() * availableQuestions.length)]
 }
@@ -78,8 +79,47 @@ function QuePerDice(): JSX.Element {
           setAskedQuestions(new Set())
           setCurrentQuestion(getRandomQuestion(groupedQuestions[name] || [], new Set()))
         }
+
+        // Store in cache for offline use
+        if ("caches" in window) {
+          const cache = await caches.open("api-cache")
+          await cache.put(
+            "/api/questions",
+            new Response(JSON.stringify(data), {
+              headers: { "Content-Type": "application/json" },
+            }),
+          )
+        }
       } catch (error) {
         console.error("Error fetching questions:", error)
+
+        // Try to get from cache if network request fails
+        if ("caches" in window) {
+          try {
+            const cache = await caches.open("api-cache")
+            const cachedResponse = await cache.match("/api/questions")
+
+            if (cachedResponse) {
+              const cachedData = await cachedResponse.json()
+              if (cachedData.success && cachedData.data.length > 0) {
+                const groupedQuestions: Record<Category, Question[]> = {}
+                cachedData.data.forEach(
+                  (q: { category: string; question: string; options: Option[]; correctAnswerId: string }) => {
+                    if (!groupedQuestions[q.category]) groupedQuestions[q.category] = []
+                    groupedQuestions[q.category].push(q)
+                  },
+                )
+                setCategories(Object.keys(groupedQuestions))
+                setSelectedCategory(name)
+                setQuestions(groupedQuestions[name] || [])
+                setAskedQuestions(new Set())
+                setCurrentQuestion(getRandomQuestion(groupedQuestions[name] || [], new Set()))
+              }
+            }
+          } catch (cacheError) {
+            console.error("Error fetching from cache:", cacheError)
+          }
+        }
       } finally {
         setLoading(false)
         setTimeout(() => {
@@ -107,7 +147,7 @@ function QuePerDice(): JSX.Element {
     setShowAnswer(false)
     const nextQuestion = getRandomQuestion(questions, askedQuestions)
     if (nextQuestion) {
-      setAskedQuestions(prev => new Set([...prev, nextQuestion.question]))
+      setAskedQuestions((prev) => new Set([...prev, nextQuestion.question]))
       setCurrentQuestion(nextQuestion)
       setTimeLeft(30)
       setTimerActive(true)
