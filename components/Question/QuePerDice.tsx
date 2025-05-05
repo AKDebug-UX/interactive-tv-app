@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useRef, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 interface Option {
   id: string
@@ -19,16 +19,40 @@ interface Question {
 
 type Category = string
 
+interface SessionData {
+  id: string
+  lastPage: string
+}
+
 function getRandomQuestion(questions: Question[], askedQuestions: Set<string>): Question | null {
   const availableQuestions = questions.filter((q) => !askedQuestions.has(q.question))
   if (availableQuestions.length === 0) return null
   return availableQuestions[Math.floor(Math.random() * availableQuestions.length)]
 }
 
-function QuePerDice(): JSX.Element {
+// Generate a unique session ID
+function generateSessionId() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
+// Get or create session ID from localStorage
+function getSessionId() {
+  if (typeof window === "undefined") return null
+
+  let sessionId = localStorage.getItem("quizSessionId")
+  if (!sessionId) {
+    sessionId = generateSessionId()
+    localStorage.setItem("quizSessionId", sessionId)
+  }
+  return sessionId
+}
+
+export function QuizComponent(): JSX.Element {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const id = searchParams.get("id") ?? "1"
   const name = searchParams.get("name") ?? "Unknown"
+  const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState<Category>("")
   const [questions, setQuestions] = useState<Question[]>([])
@@ -38,14 +62,21 @@ function QuePerDice(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(true)
   const [timeLeft, setTimeLeft] = useState<number>(30)
   const [timerActive, setTimerActive] = useState<boolean>(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
 
   const audioContextRef = useRef<AudioContext | null>(null)
 
+  // Initialize audio context
   useEffect(() => {
     audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     return () => {
       audioContextRef.current?.close()
     }
+  }, [])
+
+  // Initialize session ID
+  useEffect(() => {
+    setSessionId(getSessionId())
   }, [])
 
   const playSound = useCallback((frequency: number, duration: number) => {
@@ -62,46 +93,84 @@ function QuePerDice(): JSX.Element {
     }
   }, [])
 
+  // Track page navigation
+  useEffect(() => {
+    // Record the current page URL when component mounts
+    const currentUrl = window.location.href
+    localStorage.setItem("lastQuizPage", currentUrl)
+
+    // Handle beforeunload event to track refreshes
+    const handleBeforeUnload = () => {
+      localStorage.setItem("quizRefreshed", "true")
+      localStorage.setItem("quizRefreshTime", Date.now().toString())
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [])
+
+  // Fetch questions with session tracking
   useEffect(() => {
     async function fetchQuestions() {
       try {
-        const res = await fetch("/api/questions")
+        // Check if we're coming from a refresh
+        const wasRefreshed = localStorage.getItem("quizRefreshed") === "true"
+        const refreshTime = localStorage.getItem("quizRefreshTime")
+        const lastPage = localStorage.getItem("lastQuizPage")
+
+        // Clear the refresh flag
+        localStorage.setItem("quizRefreshed", "false")
+
+        // Add session ID to the request
+        const sid = sessionId || "anonymous"
+        const url = `/api/questions?sessionId=${sid}${wasRefreshed ? `&refreshed=true&from=${encodeURIComponent(lastPage || "")}` : ""}`
+
+        const res = await fetch(url)
         const data = await res.json()
+
         if (data.success && data.data.length > 0) {
+          // Store session data
+          setSessionData(data.session)
+
           const groupedQuestions: Record<Category, Question[]> = {}
           data.data.forEach((q: { category: string; question: string; options: Option[]; correctAnswerId: string }) => {
             if (!groupedQuestions[q.category]) groupedQuestions[q.category] = []
             groupedQuestions[q.category].push(q)
           })
+
+          setLoading(false)
           setCategories(Object.keys(groupedQuestions))
           setSelectedCategory(name)
           setQuestions(groupedQuestions[name] || [])
           setAskedQuestions(new Set())
           setCurrentQuestion(getRandomQuestion(groupedQuestions[name] || [], new Set()))
-        }
 
-        // Store in cache for offline use
-        if ("caches" in window) {
-          const cache = await caches.open("api-cache")
-          await cache.put(
-            "/api/questions",
-            new Response(JSON.stringify(data), {
-              headers: { "Content-Type": "application/json" },
-            }),
-          )
+          // Store in cache for offline use
+          if ("caches" in window) {
+            const cache = await caches.open("api-cache")
+            await cache.put(
+              url,
+              new Response(JSON.stringify(data), {
+                headers: { "Content-Type": "application/json" },
+              }),
+            )
+          }
         }
-      } catch (error) {
-        console.error("Error fetching questions:", error)
 
         // Try to get from cache if network request fails
         if ("caches" in window) {
           try {
             const cache = await caches.open("api-cache")
-            const cachedResponse = await cache.match("/api/questions")
+            const cachedResponse = await cache.match(url)
 
             if (cachedResponse) {
               const cachedData = await cachedResponse.json()
               if (cachedData.success && cachedData.data.length > 0) {
+                setSessionData(cachedData.session)
+
                 const groupedQuestions: Record<Category, Question[]> = {}
                 cachedData.data.forEach(
                   (q: { category: string; question: string; options: Option[]; correctAnswerId: string }) => {
@@ -109,6 +178,10 @@ function QuePerDice(): JSX.Element {
                     groupedQuestions[q.category].push(q)
                   },
                 )
+                setTimeout(() => {
+                  setTimerActive(true)
+                }, 500)
+                setLoading(false)
                 setCategories(Object.keys(groupedQuestions))
                 setSelectedCategory(name)
                 setQuestions(groupedQuestions[name] || [])
@@ -120,16 +193,21 @@ function QuePerDice(): JSX.Element {
             console.error("Error fetching from cache:", cacheError)
           }
         }
+      } catch (error) {
+        console.error("Error fetching questions:", error)
       } finally {
-        setLoading(false)
-        setTimeout(() => {
-          setTimerActive(true)
-        }, 500) // Ensure UI loads first before starting timer
+        // setTimeout(() => {
+        //   setTimerActive(true)
+        // }, 500) // Ensure UI loads first before starting timer
       }
     }
-    fetchQuestions()
-  }, [name])
 
+    if (sessionId) {
+      fetchQuestions()
+    }
+  }, [name, sessionId])
+
+  // Timer effect
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
       const timerId = setTimeout(() => {
@@ -151,6 +229,15 @@ function QuePerDice(): JSX.Element {
       setCurrentQuestion(nextQuestion)
       setTimeLeft(30)
       setTimerActive(true)
+    }
+  }
+
+  // Save progress before navigating away
+  const handleSaveProgress = () => {
+    if (currentQuestion) {
+      localStorage.setItem("currentQuestionId", currentQuestion.question)
+      localStorage.setItem("timeLeft", timeLeft.toString())
+      localStorage.setItem("category", selectedCategory)
     }
   }
 
@@ -178,10 +265,16 @@ function QuePerDice(): JSX.Element {
               </button>
             </div>
             <div className="mt-16">
-              <Link href="/" className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-4 text-xl">
+              <Link
+                href="/"
+                className="bg-[#4a5f31] hover:bg-[#3d4f28] text-white px-8 py-4 text-xl"
+                onClick={handleSaveProgress}
+              >
                 Back to Home
               </Link>
             </div>
+
+            {sessionData && <div className="mt-4 text-sm text-gray-500">Session ID: {sessionData.id}</div>}
           </div>
 
           <div className="flex flex-col w-[70%] items-center justify-between space-x-8">
@@ -231,7 +324,7 @@ function QuePerDice(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center mt-[12rem] h-full">
           <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
         </div>
       )}
@@ -242,7 +335,7 @@ function QuePerDice(): JSX.Element {
 export default function WithSuspense() {
   return (
     <Suspense fallback={<>Loading...</>}>
-      <QuePerDice />
+      <QuizComponent />
     </Suspense>
   )
 }

@@ -38,7 +38,7 @@ export function InstallPWA() {
           console.log("User dismissed the install prompt");
         }
         setDeferredPrompt(null);
-        // setIsInstallable(false); // Hide the install button after install
+        setIsInstallable(false); // Hide the install button after install
       } else {
         console.log("User chose not to install the app.");
       }
