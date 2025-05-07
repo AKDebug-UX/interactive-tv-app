@@ -1,103 +1,89 @@
-// Service Worker for offline functionality
+// If the loader is already loaded, just stop.
+if (!self.define) {
+  let registry = {};
 
-const CACHE_NAME = "offline-cache-v1"
-const OFFLINE_URL = "/offline.html"
+  // Used for `eval` and `importScripts` where we can't get script URL by other means.
+  // In both cases, it's safe to use a global var because those functions are synchronous.
+  let nextDefineUri;
 
-const urlsToCache = ["/", "/offline.html", "/manifest.json", "/icon-192x192.png", "/icon-512x512.png"]
+  const singleRequire = (uri, parentUri) => {
+    uri = new URL(uri + ".js", parentUri).href;
+    return registry[uri] || (
 
-// Install event - cache essential files
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache")
-      return cache.addAll(urlsToCache)
-    }),
-  )
-  // Force the waiting service worker to become the active service worker
-  self.skipWaiting()
-})
+      new Promise(resolve => {
+        if ("document" in self) {
+          const script = document.createElement("script");
+          script.src = uri;
+          script.onload = resolve;
+          document.head.appendChild(script);
+        } else {
+          nextDefineUri = uri;
+          importScripts(uri);
+          resolve();
+        }
+      })
 
-// Activate event - clean up old caches
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName)
+        .then(() => {
+          let promise = registry[uri];
+          if (!promise) {
+            throw new Error(`Module ${uri} didn’t register its module`);
           }
-        }),
-      )
-    }),
-  )
-  // Take control of all clients as soon as it activates
-  self.clients.claim()
-})
-
-// Fetch event - serve from cache or network
-self.addEventListener("fetch", (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return
-  }
-
-  // Handle API requests specially
-  if (event.request.url.includes("/api/") || event.request.url.includes("jsonplaceholder.typicode.com")) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Clone the response to store in cache
-          const responseToCache = response.clone()
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
-          })
-
-          return response
+          return promise;
         })
-        .catch(() => {
-          // If network fetch fails, try to get from cache
-          return caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse
-            }
-            // If not in cache, return a generic offline response
-            return new Response(
-              JSON.stringify({
-                error: "You are offline and this data is not cached.",
-              }),
-              {
-                headers: { "Content-Type": "application/json" },
-              },
-            )
-          })
-        }),
-    )
-    return
-  }
+    );
+  };
 
-  // For non-API requests, use a "stale-while-revalidate" strategy
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          // Update the cache
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone())
-          })
-          return networkResponse
-        })
-        .catch((error) => {
-          console.error("Fetch failed:", error)
-          // If it's a navigation request and we're offline, show the offline page
-          if (event.request.mode === "navigate") {
-            return caches.match(OFFLINE_URL)
-          }
-          return new Response("Network error", { status: 408, headers: { "Content-Type": "text/plain" } })
-        })
+  self.define = (depsNames, factory) => {
+    const uri = nextDefineUri || ("document" in self ? document.currentScript.src : "") || location.href;
+    if (registry[uri]) {
+      // Module is already loading or loaded.
+      return;
+    }
+    let exports = {};
+    const require = depUri => singleRequire(depUri, uri);
+    const specialDeps = {
+      module: { uri },
+      exports,
+      require
+    };
+    registry[uri] = Promise.all(depsNames.map(
+      depName => specialDeps[depName] || require(depName)
+    )).then(deps => {
+      factory(...deps);
+      return exports;
+    });
+  };
+}
+define(['./workbox-e43f5367'], (function (workbox) {
+  'use strict';
 
-      // Return the cached response immediately, or wait for network response
-      return cachedResponse || fetchPromise
-    }),
-  )
-})
+  importScripts();
+  self.skipWaiting();
+  workbox.clientsClaim();
+  workbox.registerRoute("/", new workbox.NetworkFirst({
+    "cacheName": "start-url",
+    plugins: [{
+      cacheWillUpdate: async ({
+        request,
+        response,
+        event,
+        state
+      }) => {
+        if (response && response.type === 'opaqueredirect') {
+          return new Response(response.body, {
+            status: 200,
+            statusText: 'OK',
+            headers: response.headers
+          });
+        }
+        return response;
+      }
+    }]
+  }), 'GET');
+  workbox.registerRoute(/.*/i, new workbox.NetworkOnly({
+    "cacheName": "dev",
+    plugins: []
+  }), 'GET');
+
+}));
+//# sourceMappingURL=sw.js.map
