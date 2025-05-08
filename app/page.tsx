@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react" // Added missing useEffect import
 import Image from "next/image"
 import DashboardLayout from "@/components/DashboardLayout"
 import Link from "next/link"
@@ -20,11 +20,11 @@ export default function TrainingGame() {
   const [currentQuestion, setCurrentQuestion] = useState<{ question: string; answer: string } | null>(null)
   const [showAnswer, setShowAnswer] = useState(false)
 
-
   const rollDice = () => {
     setIsRolling(true)
+    // Add error handling for audio playback
     const audio = new Audio("/dice-roll.mp3")
-    audio.play()
+    audio.play().catch(err => console.error("Error playing sound:", err))
 
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * diceImages.length)
@@ -33,6 +33,28 @@ export default function TrainingGame() {
     }, 800)
   }
 
+  // Move service worker registration to a useEffect hook
+  useEffect(() => {
+    if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then((registration) => {
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing
+          if (installingWorker) {
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === "installed") {
+                if (navigator.serviceWorker.controller) {
+                  // New content is available, you can notify the user if needed
+                  console.log("New content is available; please refresh.")
+                }
+              }
+            }
+          }
+        }
+      }).catch(error => {
+        console.error("Service worker registration failed:", error)
+      })
+    }
+  }, [])
 
   return (
     <DashboardLayout>
@@ -46,24 +68,29 @@ export default function TrainingGame() {
                 <video
                   autoPlay
                   loop
+                  muted // Added muted attribute to ensure video plays
                   src="/Dice video.mp4"
                   className={`w-[350px] h-[270px] border-2 border-black bg-white dice-face ${!isRolling ? "z-10" : ""}`}
                 />
-
               ) : (
-                <Image src={selectedImage} alt="Dice Face" width={350} height={350} className="border-2 border-black" />
+                <Image src={selectedImage || "/placeholder.svg"} alt="Dice Face" width={350} height={350} className="border-2 border-black" />
               )}
             </div>
 
             {/* Categories Grid */}
             <div className="grid grid-cols-3 w-full items-center justify-center gap-12">
-              {categories.map((category, index) => (
+              {categories.map((category) => (
                 <Link
                   key={category.id}
-                  href={`/qa-game?id=${category.id}&&name=${category.name}`}
+                  href={`/qa-game?id=${category.id}&name=${category.name}`} // Fixed double ampersand to single
                   className={"w-[250px] h-[250px] aspect-square relative p-8 text-center font-bold text-3xl whitespace-pre-line"}
                 >
-                  <Image src={`img/${category.img}`} alt="Dice Face" fill className="" />
+                  <Image
+                    src={`/img/${category.img}`} // Added leading slash for public directory
+                    alt={category.name}
+                    fill
+                    className=""
+                  />
                 </Link>
               ))}
             </div>
@@ -74,7 +101,6 @@ export default function TrainingGame() {
   )
 }
 
-
 const diceImages = [
   "/dice/dice-face-1.png",
   "/dice/dice-face-2.png",
@@ -83,6 +109,7 @@ const diceImages = [
   "/dice/dice-face-5.png",
   "/dice/dice-face-6.png",
 ]
+
 const categories: Category[] = [
   {
     id: 1,

@@ -1,3 +1,16 @@
+// next.config.mjs
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+import NextPWA from 'next-pwa';
+
+const withPWA = NextPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  // Remove the runtime checks that won't work during build
+  // typeof window === 'undefined' || !('serviceWorker' in navigator)
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -45,4 +58,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
