@@ -1,31 +1,42 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { ThemeProvider } from "@/components/theme-provider"
+import type React from "react"
+import "./globals.css"
 
-export const metadata: Metadata = {
-  title: 'interactive-tv',
-  description: 'interactive-tv app',
-  generator: 'AKDebug',
+export const metadata = {
+  title: "My PWA App",
+  description: "My Progressive Web App",
+  // Remove the manifest property from here as we're using the app/manifest.ts file
+  themeColor: "#000000",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "My PWA App",
+  },
+  // Add these meta tags for iOS support
+  icons: {
+    apple: [{ url: "/icons/apple-icon-180.png", sizes: "180x180", type: "image/png" }],
+  },
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"></link>
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/icons/apple-icon-180.png" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="bg-white text-black">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

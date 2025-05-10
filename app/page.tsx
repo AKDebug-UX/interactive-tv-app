@@ -16,9 +16,6 @@ type Category = {
 export default function TrainingGame() {
   const [selectedImage, setSelectedImage] = useState(diceImages[0])
   const [isRolling, setIsRolling] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-  const [currentQuestion, setCurrentQuestion] = useState<{ question: string; answer: string } | null>(null)
-  const [showAnswer, setShowAnswer] = useState(false)
 
   const rollDice = () => {
     setIsRolling(true)
@@ -33,25 +30,19 @@ export default function TrainingGame() {
     }, 800)
   }
 
-  // Move service worker registration to a useEffect hook
   useEffect(() => {
-    if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").then((registration) => {
         registration.onupdatefound = () => {
           const installingWorker = registration.installing
-          if (installingWorker) {
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === "installed") {
-                if (navigator.serviceWorker.controller) {
-                  // New content is available, you can notify the user if needed
-                  console.log("New content is available; please refresh.")
-                }
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === "installed") {
+              if (navigator.serviceWorker.controller) {
+                // New content is available, you can notify the user if needed
               }
             }
           }
         }
-      }).catch(error => {
-        console.error("Service worker registration failed:", error)
       })
     }
   }, [])

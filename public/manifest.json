@@ -1,20 +1,25 @@
 {
-  "name": "Offline-Ready PWA",
-  "short_name": "Offline PWA",
-  "description": "A Progressive Web App that works offline",
+  "name": "BrainBash",
+  "short_name": "BrainBash",
+  "description": "Prepare for your exams with BrainBash - practice questions and track your progress.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/logo.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

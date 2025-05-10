@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Dice1Icon as User, Plus } from "lucide-react"
-import { InstallPWA } from "@/components/install-pwa"
+import InstallPWA from "@/components/install-pwa"
 import { NetworkStatus } from "@/components/network-status"
 import Footer from "./Footer"
 import Image from "next/image"
@@ -49,6 +49,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex gap-3 items-center">
           <NetworkStatus />
           <InstallPWA />
+           <Link href="/pwa-debug">
+        <button variant="outline">Open PWA Debug Page</button>
+      </Link>
+
           <div className="flex bg-gray-100 rounded-md items-center">
             <NavItem href="/upload-qa" icon={Plus}>
               Upload Question
