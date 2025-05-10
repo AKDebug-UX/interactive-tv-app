@@ -1,25 +1,28 @@
 {
-  "name": "BrainBash",
-  "short_name": "BrainBash",
-  "description": "Prepare for your exams with BrainBash - practice questions and track your progress.",
+  "name": "Interactive-TV",
+  "short_name": "Interactive-TV",
+  "description": "A Interactive-TV Web App built",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#000000",
+  "scope": "/",
+  "id": "/",
   "orientation": "portrait",
+  "categories": ["productivity"],
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/img/CiS_ACF_CCF_Banner_Kings_Crown.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/logo.png",
+      "src": "/img/CiS_ACF_CCF_Banner_Kings_Crown.png",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "/logo.png",
+      "src": "/img/CiS_ACF_CCF_Banner_Kings_Crown.png",
       "sizes": "512x512",
       "type": "image/png"
     }

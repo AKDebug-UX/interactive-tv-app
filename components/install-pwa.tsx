@@ -3,49 +3,51 @@
 import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
 
-export default function PWAInstallButton() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [isInstallable, setIsInstallable] = useState(false)
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
+
+export function InstallPWA() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    // Listen for the beforeinstallprompt event
-    window.addEventListener("beforeinstallprompt", (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault()
-      // Stash the event so it can be triggered later
-      setDeferredPrompt(e)
-      // Update UI to notify the user they can install the PWA
-      setIsInstallable(true)
-    })
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsInstallable(true);
+    };
 
-    window.addEventListener("appinstalled", () => {
-      // Log install to analytics
-      console.log("PWA was installed")
-      setIsInstallable(false)
-    })
-  }, [])
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-  const handleInstallClick = () => {
-    // Hide the app provided install promotion
-    setIsInstallable(false)
-    // Show the install prompt
-    deferredPrompt.prompt()
-    // Wait for the user to respond to the prompt
-    deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-      if (choiceResult.outcome === "accepted") {
-        console.log("User accepted the install prompt")
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      const confirmInstall = window.confirm("Would you like to install this app?");
+      if (confirmInstall) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          console.log("User accepted the install prompt");
+        } else {
+          console.log("User dismissed the install prompt");
+        }
+        setDeferredPrompt(null);
+        setIsInstallable(false); // Hide the install button after install
       } else {
-        console.log("User dismissed the install prompt")
+        console.log("User chose not to install the app.");
       }
-      setDeferredPrompt(null)
-    })
-  }
-
-  if (!isInstallable) {
-    return null
-  }
+    }
+  };
 
   return (
+    <>
+      {isInstallable && (
         <button
           onClick={handleInstallClick}
           title="Download"
@@ -53,5 +55,7 @@ export default function PWAInstallButton() {
         >
           <Download className="h-4 w-4" />
         </button>
+      )}
+    </>
   );
 }
