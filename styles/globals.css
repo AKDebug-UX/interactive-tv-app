@@ -12,9 +12,9 @@
   --foreground: 222.2 84% 4.9%;
 }
 
-body {
+/* body {
   font-family: "Neo Sans", sans-serif;
-}
+} */
 
 .scene {
   perspective: 1000px;
